@@ -1,12 +1,21 @@
+# Import the libraries
 import tkinter as tk
 from tkinter import Entry, Label, messagebox
 import json
 import random
 
+# Create and generate the app
 class GermanApp:
     def __init__(self, root):
+        
+        # Initialize the array to save the points for each word
+        self.points = []
+
         self.root = root
         self.root.title("German Learning App")
+
+        self.root.geometry("400x350")  # Set initial size
+        self.root.configure(padx=10, pady=10)
 
         # Load existing data from JSON file
         self.data = self.load_data()
@@ -24,11 +33,11 @@ class GermanApp:
         self.check_button = tk.Button(root, text="Check", command=self.check_answer)
         self.check_button.pack(pady=10)
 
-        self.next_button = tk.Button(root, text="Next", command=self.next_word, state=tk.DISABLED)
-        self.next_button.pack(pady=10)
-
         self.next_button = tk.Button(root, text="Add", command=self.show_add_dialog)
         self.next_button.pack(pady=10)
+
+        self.points_label = Label(root, text="", font=("Helvetica", 16))
+        self.points_label.pack(pady=20)
 
     def load_data(self):
         try:
@@ -43,16 +52,24 @@ class GermanApp:
             json.dump(self.data, file, ensure_ascii=False, indent=2)
 
     def play_word(self):
+
+        if len(self.points) < len(list(self.data.values())):
+            self.points.clear()
+
         if not self.data:
             self.label.config(text="No words available. Add some first!")
             return
+        
+        while True:
+            self.current_german_word = random.choice(list(self.data.keys()))
+            if self.current_german_word not in self.points:
+                break
 
-        self.current_german_word = random.choice(list(self.data.keys()))
         self.label.config(text=self.current_german_word)
         self.play_button.config(state=tk.DISABLED)
         self.answer_entry.config(state=tk.NORMAL)
         self.check_button.config(state=tk.NORMAL)
-        self.next_button.config(state=tk.DISABLED)
+        self.points_label.config(text=f"{len(self.points)} Correctly Guessed")
 
     def check_answer(self):
         user_answer = self.answer_entry.get().strip().lower()
@@ -60,21 +77,19 @@ class GermanApp:
 
         if user_answer == correct_answer:
             messagebox.showinfo("Correct", "Your answer is correct!")
+            self.points.append(self.current_german_word)
         else:
             messagebox.showerror("Incorrect", "Your answer is incorrect. Try again.")
 
         self.play_button.config(state=tk.NORMAL)
         self.answer_entry.config(state=tk.DISABLED)
         self.check_button.config(state=tk.DISABLED)
-        self.next_button.config(state=tk.NORMAL)
 
-    def next_word(self):
-        self.label.config(text="")
-        self.answer_entry.delete(0, tk.END)
-        self.play_button.config(state=tk.NORMAL)
-        self.answer_entry.config(state=tk.DISABLED)
-        self.check_button.config(state=tk.DISABLED)
-        self.next_button.config(state=tk.DISABLED)
+        if len(self.points) < len(list(self.data.values())):
+            self.answer_entry.delete(0, tk.END)
+            self.play_word()
+        else:
+            messagebox.showinfo("Congrats", "You have studied all words.")
 
     def show_add_dialog(self):
         add_window = tk.Toplevel(self.root)
