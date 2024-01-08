@@ -53,7 +53,7 @@ class GermanApp:
 
     def play_word(self):
 
-        if len(self.points) < len(list(self.data.values())):
+        if len(self.points) >= len(list(self.data.values())):
             self.points.clear()
 
         if not self.data:
