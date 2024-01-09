@@ -73,23 +73,26 @@ class GermanApp:
 
     def check_answer(self):
         user_answer = self.answer_entry.get().strip().lower()
-        correct_answer = self.data.get(self.current_german_word, "").lower()
+        if user_answer:
+            correct_answer = self.data.get(self.current_german_word, "").lower()
 
-        if user_answer == correct_answer:
-            messagebox.showinfo("Correct", "Your answer is correct!")
-            self.points.append(self.current_german_word)
+            if user_answer == correct_answer:
+                messagebox.showinfo("Correct", "Your answer is correct!")
+                self.points.append(self.current_german_word)
+            else:
+                messagebox.showerror("Incorrect", "Your answer is incorrect. Try again.")
+
+            self.play_button.config(state=tk.NORMAL)
+            self.answer_entry.config(state=tk.DISABLED)
+            self.check_button.config(state=tk.DISABLED)
+
+            if len(self.points) < len(list(self.data.values())):
+                self.answer_entry.delete(0, tk.END)
+                self.play_word()
+            else:
+                messagebox.showinfo("Congrats", "You have studied all words.")
         else:
-            messagebox.showerror("Incorrect", "Your answer is incorrect. Try again.")
-
-        self.play_button.config(state=tk.NORMAL)
-        self.answer_entry.config(state=tk.DISABLED)
-        self.check_button.config(state=tk.DISABLED)
-
-        if len(self.points) < len(list(self.data.values())):
-            self.answer_entry.delete(0, tk.END)
-            self.play_word()
-        else:
-            messagebox.showinfo("Congrats", "You have studied all words.")
+            tk.messagebox.showwarning("Error", "Field must be filled!")
 
     def show_add_dialog(self):
         add_window = tk.Toplevel(self.root)
@@ -115,9 +118,12 @@ class GermanApp:
 
     def add_word(self, german, english, add_window):
         if german and english:
-            self.data[german] = english
-            self.save_data()
-            add_window.destroy()
+            if german in self.data.keys():
+                tk.messagebox.showwarning("Error", "The word was previously added")
+            else:
+                self.data[german] = english
+                self.save_data()
+                add_window.destroy()
         else:
             tk.messagebox.showwarning("Error", "Both fields must be filled!")
 
