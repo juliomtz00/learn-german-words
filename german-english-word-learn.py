@@ -73,10 +73,11 @@ class GermanApp:
 
     def check_answer(self):
         user_answer = self.answer_entry.get().strip().lower()
+        user_answer = user_answer.split(", ")
         if user_answer:
             correct_answer = self.data.get(self.current_german_word, "").lower()
 
-            if user_answer == correct_answer:
+            if correct_answer in user_answer:
                 messagebox.showinfo("Correct", "Your answer is correct!")
                 self.points.append(self.current_german_word)
             else:
